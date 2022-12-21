@@ -1,90 +1,78 @@
-/**
- * creating sections dynamically
- * by using createSection function and add them to the main tag
- * ES6
- */
-// counter to specify attributes and number of section
-let counter = 0;
-const createSection = () => {
-  counter++;
-  const content = `<section id="section${counter}" data-nav="Section ${counter}">
+//scroll to top smoothly
+const TopScreen = document.getElementById("to-top");
+const header = document.querySelector(".header__page");
+TopScreen.addEventListener("click", () => {
+  document.body.scrollTo({ top: 0, behavior: "smooth" }); // Safari
+  document.documentElement.scrollTo({ top: 0, behavior: "smooth" });  // Chrome, Firefox, IE and Opera
+});
+/*
+1 : A lastSecId to calculate the number of added slots
+2 : Create a function that adds content to the page while changing the order of the sections on the page
+3 : Use getElementsByTagName : to get "main"
+4 : Use insertAdjacentHTML :To add content at the end each time
+*/
+let lastSecId = 0;
+const createNewSection = () => {
+  lastSecId++;
+  const content = `<section id="section${lastSecId}" data-navpar="Section ${lastSecId}">
     <div class="landing__container">
-    <h2>Section ${counter}</h2>
-    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi fermentum metus faucibus lectus pharetra dapibus. Suspendisse potenti. Aenean aliquam elementum mi, ac euismod augue. Donec eget lacinia ex. Phasellus imperdiet porta orci eget mollis. Sed convallis sollicitudin mauris ac tincidunt. Donec bibendum, nulla eget bibendum consectetur, sem nisi aliquam leo, ut pulvinar quam nunc eu augue. Pellentesque maximus imperdiet elit a pharetra. Duis lectus mi, aliquam in mi quis, aliquam porttitor lacus. Morbi a tincidunt felis. Sed leo nunc, pharetra et elementum non, faucibus vitae elit. Integer nec libero venenatis libero ultricies molestie semper in tellus. Sed congue et odio sed euismod.</p>
-    
+    <h2>Section ${lastSecId}</h2>
+    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi fermentum metus faucibus lectus pharetra dapibus. Suspendisse potenti. Aenean aliquam elementum mi, ac euismod augue. Donec eget lacinia ex. Phasellus imperdiet porta orci eget mollis. Sed convallis sollicitudin mauris ac tincidunt. Donec bibendum, nulla eget bibendum consectetur, sem nisi aliquam leo, ut pulvinar quam nunc eu augue. Pellentesque maximus imperdiet elit a pharetra. Duis lectus mi, aliquam in mi quis</p>
     <p>Aliquam a convallis justo. Vivamus venenatis, erat eget pulvinar gravida, ipsum lacus aliquet velit, vel luctus diam ipsum a diam. Cras eu tincidunt arcu, vitae rhoncus purus. Vestibulum fermentum consectetur porttitor. Suspendisse imperdiet porttitor tortor, eget elementum tortor mollis non.</p>
     </div>
     </section>`;
-  document.querySelector("main").insertAdjacentHTML("beforeend", content);
+  document.getElementsByTagName("main")[0].insertAdjacentHTML("beforeend", content);
 };
-/**
- * make list items equal to the number of sections by iterate on them
- * but I need to remove all items to avoid the duplicating
+/*
+ 1 : get navbar amd get all sections and loop sections
+ 2 : querySelectorAll return nodelist array
+ 3 : get nodelist (item id & )
+ 4 : dataset :  to read data-navpar
  */
-const navBar = document.getElementById("navbar__list");
+const navBar = document.getElementById("navbar__list__menu");
 const createNavItems = () => {
   navBar.innerHTML = "";
-  document.querySelectorAll("section").forEach((section) => {
-    const listItem = `<li><a href="#${section.id}" data-nav="${section.id}" class="menu__link">${section.dataset.nav}</a></li>`;
+  const nodeSections = document.querySelectorAll("section") 
+  nodeSections.forEach((item) => {
+    const listItem = `<li><a href="#${item.id}" data-navpar="${item.id}" class="menu__link">${item.dataset.navpar}</a></li>`;
     navBar.insertAdjacentHTML("beforeend", listItem);
   });
 };
-/**
- *  function to observe the section to specify which section on the viewport and its link
- *  loop over entries (sections)
- *  get active link by using the id of the section on viewport
- *  add active class to the section on viewport
- *  add active class to the section's link
- *  edit the hash of location manual cause i prevent default behavior
- *  remove active classes
+/*
+ 1 : preventDefault : method cancels the event if it is cancelable
+ 2 : scrollIntoView : to scroll smooth
  */
-
-///////// using Element.getBoundingClientRect() instead of Intersection Observer API ///////////////////
-window.onscroll = function () {
-  document.querySelectorAll("section").forEach(function (active) {
-    let activeLink = navBar.querySelector(`[data-nav=${active.id}]`);
-    if (
-      active.getBoundingClientRect().top >= -400 &&
-      active.getBoundingClientRect().top <= 150
-    ) {
-      active.classList.add("your-active-class");
-      activeLink.classList.add("active-link");
-    } else {
-      active.classList.remove("your-active-class");
-      activeLink.classList.remove("active-link");
-    }
-  });
-};
-
 navBar.addEventListener("click", (event) => {
   event.preventDefault();
-  if (event.target.dataset.nav) {
-    document
-      .getElementById(`${event.target.dataset.nav}`)
-      .scrollIntoView({ behavior: "smooth" });
-    setTimeout(() => {
-      location.hash = `${event.target.dataset.nav}`;
-    }, 200);
+  if (event.target.dataset.navpar) {
+    document.getElementById(`${event.target.dataset.navpar}`).
+    scrollIntoView({behavior: "smooth", inline: "nearest"});;
   }
 });
 
-for (let i = 1; i < 5; i++) createSection();
+window.addEventListener( "scroll",() =>   {
+  const nodeSections = document.querySelectorAll("section") 
+  nodeSections.forEach( (item) => {
+    let activeClass = navBar.querySelector(`[data-navpar=${item.id}]`);
+    const scroll = item.getBoundingClientRect();
+    if (scroll.top <= 380 && scroll.bottom >= 350) {
+      item.classList.add("active-class");
+      activeClass.classList.add("active-link");
+
+    } else {
+      item.classList.remove("active-class");
+      activeClass.classList.remove("active-link");
+
+    }
+  });
+});
+// Run the function for creating section
+for (let i = 1; i < 5; i++) {
+  createNewSection();
+} 
 createNavItems();
-// observingSections();
-
-// creating more sections by click on the button
 document.getElementById("btn").addEventListener("click", () => {
-  createSection();
+  createNewSection();
   createNavItems();
-  // observingSections();
-});
-// save the icon used to go to the top and the header in variables
-const toTop = document.getElementById("to-top");
-const header = document.querySelector(".page__header");
-
-// Clicking on the icon the document will scroll to the top smoothly
-toTop.addEventListener("click", () => {
-  document.documentElement.scrollTo({ top: 0, behavior: "smooth" });
 });
 
-let isScrolling;
